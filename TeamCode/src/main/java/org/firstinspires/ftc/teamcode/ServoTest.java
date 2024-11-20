@@ -9,7 +9,7 @@ public class ServoTest extends LinearOpMode {
     Servo servo;
     @Override
     public void runOpMode() throws InterruptedException {
-        servo = hardwareMap.get(Servo.class, "gripper");
+        servo = hardwareMap.get(Servo.class, "claw");
         waitForStart();
         while (opModeIsActive()) {
             if (gamepad2.left_bumper) {

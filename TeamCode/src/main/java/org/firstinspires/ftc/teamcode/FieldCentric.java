@@ -15,7 +15,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 public class FieldCentric extends LinearOpMode {
 
     DcMotor FR, FL, BR, BL, arm, slide;
-    Servo servo;
+    Servo claw;
 
     IMU imu;
     IMU.Parameters myIMUparameters;
@@ -36,9 +36,15 @@ public class FieldCentric extends LinearOpMode {
         FL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
 
-        arm = hardwareMap.get(DcMotor.class, "arm");
-        servo = hardwareMap.get(Servo.class, "Claw"); // named Claw for some reason
-        slide = hardwareMap.get(DcMotor.class, "slide");
+        slide = hardwareMap.get(DcMotor.class, "arm");
+        arm = hardwareMap.get(DcMotor.class, "slide");
+
+        arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        arm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        slide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        claw = hardwareMap.get(Servo.class, "claw");
 
         // IMU
         imu = hardwareMap.get(IMU.class, "imu"); // Initializing IMU in Drivers Hub
@@ -52,35 +58,48 @@ public class FieldCentric extends LinearOpMode {
         imu.initialize(myIMUparameters);
         imu.resetYaw();
 
-
         waitForStart();
+
+        int startArm = 10;
+        arm.setTargetPosition(startArm);
         while (opModeIsActive()) {
 
             fieldCentric();
 
-            if (gamepad1.a) {
-                //arm.setPower(1);
-                servo.setPosition(0.25);
-            } else if (gamepad1.b) {
-                //arm.setPower(-1);
-                servo.setPosition(0.5);
-            } else {
-                //arm.setPower(0);
-                servo.setPosition(0);
+            if (gamepad1.dpad_up && arm.getCurrentPosition() < 250) {
+//                arm.setPower(1);
+                startArm += 10;
+                sleep(100);
+            } else if (gamepad1.dpad_down && arm.getCurrentPosition() > 10) {
+//                arm.setPower(-1);
+                startArm -= 10;
+                sleep(100);
+            } else if (arm.getCurrentPosition() > 250){
+                startArm = 250;
+            } else if (arm.getCurrentPosition() < 10) {
+                startArm = 10;
             }
-            if (gamepad1.dpad_up) {
-                slide.setPower(1);
-            } else if (gamepad1.dpad_down) {
-                slide.setPower(-1);
+
+            if (gamepad1.right_trigger > 0) {
+                slide.setPower(gamepad1.right_trigger);
+            } else if (gamepad1.left_trigger > 0) {
+                slide.setPower(-gamepad1.left_trigger);
             } else {
                 slide.setPower(0);
             }
-            if (gamepad1.right_trigger > 0) {
-                arm.setPower(gamepad1.right_trigger);
-            } else if (gamepad1.left_trigger > 0) {
-                arm.setPower(-gamepad1.left_trigger);
+            if (gamepad2.left_bumper) {
+                claw.setPosition(0.05);
+            } else if (gamepad2.right_bumper) {
+                claw.setPosition(0.45);
             }
 
+            telemetry.addLine("arm:" + arm.getCurrentPosition());
+            telemetry.update();
+
+            arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            arm.setTargetPosition(startArm);
+            arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            arm.setPower(0.5);
         }
 
     }
