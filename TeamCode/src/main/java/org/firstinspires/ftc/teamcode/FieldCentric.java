@@ -60,46 +60,81 @@ public class FieldCentric extends LinearOpMode {
 
         waitForStart();
 
-        int startArm = 10;
-        arm.setTargetPosition(startArm);
+        int setArm = 10;
+        int setSlide = -1;
+        arm.setTargetPosition(setArm);
         while (opModeIsActive()) {
 
+            /**
+             * Game pad 1
+             */
             fieldCentric();
 
-            if (gamepad1.dpad_up && arm.getCurrentPosition() < 250) {
-//                arm.setPower(1);
-                startArm += 10;
-                sleep(100);
-            } else if (gamepad1.dpad_down && arm.getCurrentPosition() > 10) {
-//                arm.setPower(-1);
-                startArm -= 10;
-                sleep(100);
-            } else if (arm.getCurrentPosition() > 250){
-                startArm = 250;
-            } else if (arm.getCurrentPosition() < 10) {
-                startArm = 10;
+            if (gamepad1.left_bumper) {
+                claw.setPosition(0.45);
+            } else if (gamepad1.right_bumper) {
+                claw.setPosition(0.65);
             }
 
-            if (gamepad1.right_trigger > 0) {
-                slide.setPower(gamepad1.right_trigger);
-            } else if (gamepad1.left_trigger > 0) {
-                slide.setPower(-gamepad1.left_trigger);
-            } else {
-                slide.setPower(0);
+
+            /**
+             * Game pad 2
+             */
+
+            if (gamepad2.dpad_up && arm.getCurrentPosition() < 400) {
+                setArm += 5;
+                sleep(5);
+            } else if (gamepad2.dpad_down && arm.getCurrentPosition() > 10) {
+                setArm -= 5;
+                sleep(5);
             }
-            if (gamepad2.left_bumper) {
-                claw.setPosition(0.05);
-            } else if (gamepad2.right_bumper) {
-                claw.setPosition(0.45);
+
+            if (arm.getCurrentPosition() > 400) {
+                setArm = 400;
+            } else if (arm.getCurrentPosition() < 10) {
+                setArm = 10;
             }
+
+            if (slide.getCurrentPosition() > -1) {
+                setSlide = -1;
+            } else if (slide.getCurrentPosition() < -4000) {
+                setSlide = -4000;
+            }
+
+            if (gamepad2.right_trigger > 0 && slide.getCurrentPosition() < -1) {
+                setSlide += 10;
+                sleep(5);
+            } else if (gamepad2.left_trigger > 0 && slide.getCurrentPosition() > -4000) {
+                setSlide -= 10;
+                sleep(5);
+            }
+
+            // presets
+            if (gamepad2.a) {
+                setArm = 10;
+            } else if (gamepad2.b) { // low chamber
+                setArm = 240;
+            } else if (gamepad2.x) { // low basket
+                setArm = 300;
+            } else if (gamepad2.y) { // high chamber
+                setArm = 310;
+            }
+
+
+
 
             telemetry.addLine("arm:" + arm.getCurrentPosition());
+            telemetry.addLine("slide:" + slide.getCurrentPosition());
             telemetry.update();
 
-            arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            arm.setTargetPosition(startArm);
+            arm.setTargetPosition(setArm);
             arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            arm.setPower(0.5);
+            arm.setPower(0.8);
+
+            slide.setTargetPosition(setSlide);
+            slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            slide.setPower(0.8);
+
         }
 
     }
