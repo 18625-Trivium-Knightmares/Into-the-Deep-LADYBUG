@@ -70,28 +70,28 @@ public class FieldCentric extends LinearOpMode {
              */
             fieldCentric();
 
-            if (gamepad1.left_bumper) {
-                claw.setPosition(0.45);
-            } else if (gamepad1.right_bumper) {
-                claw.setPosition(0.65);
-            }
-
 
             /**
              * Game pad 2
              */
 
-            if (gamepad2.dpad_up && arm.getCurrentPosition() < 400) {
-                setArm += 5;
+            if (gamepad2.left_bumper) {
+                claw.setPosition(0.77);
+            } else if (gamepad2.right_bumper) {
+                claw.setPosition(1.0);
+            }
+
+            if (gamepad2.dpad_up/* && arm.getCurrentPosition() < 1000*/) {
+                setArm += 15;
                 sleep(5);
             } else if (gamepad2.dpad_down && arm.getCurrentPosition() > 10) {
-                setArm -= 5;
+                setArm -= 15;
                 sleep(5);
             }
 
-            if (arm.getCurrentPosition() > 400) {
-                setArm = 400;
-            } else if (arm.getCurrentPosition() < 10) {
+            /*if (arm.getCurrentPosition() > 1000) {
+                setArm = 1000;
+            } else */if (arm.getCurrentPosition() < 10) {
                 setArm = 10;
             }
 
@@ -102,10 +102,10 @@ public class FieldCentric extends LinearOpMode {
             }
 
             if (gamepad2.right_trigger > 0 && slide.getCurrentPosition() < -1) {
-                setSlide += 10;
+                setSlide += 50;
                 sleep(5);
             } else if (gamepad2.left_trigger > 0 && slide.getCurrentPosition() > -4000) {
-                setSlide -= 10;
+                setSlide -= 50;
                 sleep(5);
             }
 
